@@ -20,7 +20,7 @@ Bootstrap is loaded from jsDelivr; the app's custom styles are in `public/css/qu
    php artisan key:generate
    ```
 
-2. Create a database in MySQL, for example:
+2. Create a database in your local MySQL/XAMPP instance, for example:
 
    ```sql
    CREATE DATABASE quotiverse CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -48,6 +48,34 @@ Bootstrap is loaded from jsDelivr; the app's custom styles are in `public/css/qu
    ```
 
 5. Visit <http://127.0.0.1:8000>.
+
+## Deploy to Railway
+
+Keep the local `.env` settings for XAMPP. Railway uses its own service variables and does not need your local `.env`.
+
+1. Add a MySQL service to the same Railway project and environment as the Qoutiverse app service.
+2. In the **Qoutiverse app service → Variables**, set the following. Replace `MySQL` with the exact name of your Railway MySQL service:
+
+   ```dotenv
+   DB_CONNECTION=mysql
+   DB_HOST=${{MySQL.MYSQLHOST}}
+   DB_PORT=${{MySQL.MYSQLPORT}}
+   DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+   DB_USERNAME=${{MySQL.MYSQLUSER}}
+   DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+   ```
+
+   These are Railway variable references, not literal credentials. If `DB_URL` is set on the app service, remove it so it does not override the individual connection settings.
+3. In the app service's **Settings → Deploy → Pre-deploy Command**, enter:
+
+   ```sh
+   sh railway/pre-deploy.sh
+   ```
+
+   The script clears Laravel's cached configuration before running `php artisan migrate --force`. Railway will stop the deployment if either command fails. Pre-deploy runs in a separate container, so its filesystem changes are not persisted; this project does not cache configuration during its build, so the web service reads Railway's runtime variables. Avoid adding `php artisan config:cache` to a build command. Leave the detected Laravel/Railpack start command in place.
+4. Review and deploy the staged Railway variable changes. Once deployed, generate a public domain in the app service's **Settings → Networking**.
+
+The local `.env` remains configured for XAMPP at `127.0.0.1`; only the Railway app service uses the Railway database references.
 
 ## Using Qoutiverse
 
