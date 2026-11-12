@@ -66,6 +66,8 @@ Keep the local `.env` settings for XAMPP. Railway uses its own service variables
    ```
 
    These are Railway variable references, not literal credentials. If `DB_URL` is set on the app service, remove it so it does not override the individual connection settings.
+
+   The MySQL connection also accepts Railway's referenced `MYSQLHOST`, `MYSQLPORT`, `MYSQLDATABASE`, `MYSQLUSER`, and `MYSQLPASSWORD` variables directly, and prefers them over the `DB_*` fallbacks. This lets the local `.env` keep its XAMPP values while Railway uses the database service references.
 3. In the app service's **Settings → Deploy → Pre-deploy Command**, enter:
 
    ```sh
